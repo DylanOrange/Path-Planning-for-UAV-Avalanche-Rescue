@@ -1,0 +1,47 @@
+FROM ros:melodic
+
+# install ros
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-melodic-desktop-full \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN /bin/bash -c 'source /opt/ros/melodic/setup.bash'
+
+# install further ROS dependencies
+RUN apt-get update && apt-get install -y \
+        python-rosdep  \
+        python-rosinstall  \
+        python-rosinstall-generator  \
+        python-wstool  \
+        build-essential  \
+        python-rosdep \
+        ros-melodic-catkin  \
+        python-catkin-tools
+
+# install other packages
+RUN apt-get update && apt-get install -y \
+        nano  \
+        git \
+        openssh-server
+
+WORKDIR /root
+
+# Authorize SSH Host
+RUN mkdir -p /root/.ssh && \
+    chmod 0700 /root/.ssh && \
+    ssh-keyscan gitlab.lrz.de > /root/.ssh/known_hosts
+
+# clone your git using SSH connection
+RUN --mount=type=ssh git clone --recurse-submodule git@gitlab.lrz.de:ga84sij/autonomous-systems-2021-group.git
+# you might need additional git operations here
+
+# Remove SSH keys from docker
+RUN rm -rf /root/.ssh/
+
+# set working directory to project
+WORKDIR /root/autonomous-systems-2021-group/Lab_4/aas_ws
+
+RUN catkin config --extend /opt/ros/melodic
+RUN catkin build
+RUN /bin/bash -c 'source /opt/ros/melodic/setup.bash'
+RUN /bin/bash -c 'source devel/setup.bash'

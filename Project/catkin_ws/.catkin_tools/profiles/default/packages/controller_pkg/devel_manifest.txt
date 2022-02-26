@@ -1,0 +1,6 @@
+controller_pkg
+/home/dylan/autonomous-systems-2021-group/Project/catkin_ws/devel/.private/controller_pkg/cmake.lock /home/dylan/autonomous-systems-2021-group/Project/catkin_ws/devel/./cmake.lock
+/home/dylan/autonomous-systems-2021-group/Project/catkin_ws/devel/.private/controller_pkg/share/controller_pkg/cmake/controller_pkgConfig.cmake /home/dylan/autonomous-systems-2021-group/Project/catkin_ws/devel/share/controller_pkg/cmake/controller_pkgConfig.cmake
+/home/dylan/autonomous-systems-2021-group/Project/catkin_ws/devel/.private/controller_pkg/share/controller_pkg/cmake/controller_pkgConfig-version.cmake /home/dylan/autonomous-systems-2021-group/Project/catkin_ws/devel/share/controller_pkg/cmake/controller_pkgConfig-version.cmake
+/home/dylan/autonomous-systems-2021-group/Project/catkin_ws/devel/.private/controller_pkg/lib/controller_pkg/controller_node /home/dylan/autonomous-systems-2021-group/Project/catkin_ws/devel/lib/controller_pkg/controller_node
+/home/dylan/autonomous-systems-2021-group/Project/catkin_ws/devel/.private/controller_pkg/lib/pkgconfig/controller_pkg.pc /home/dylan/autonomous-systems-2021-group/Project/catkin_ws/devel/lib/pkgconfig/controller_pkg.pc

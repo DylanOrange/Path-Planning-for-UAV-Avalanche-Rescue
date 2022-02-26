@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/random_vector.h
+iostream
+-
+vector
+-
+
+/home/dylan/autonomous-systems-2021-group/Lab_1/code/src/main.cpp
+cstdlib
+-
+iostream
+-
+random_vector.h
+/home/dylan/autonomous-systems-2021-group/Lab_1/code/src/random_vector.h
+
+/home/dylan/autonomous-systems-2021-group/Lab_1/code/src/random_vector.cpp
+random_vector.h
+/home/dylan/autonomous-systems-2021-group/Lab_1/code/src/random_vector.h
+vector
+-
+

@@ -1,0 +1,11 @@
+<!--- ToDo: write controller launch script. think about how to import the .yaml file from config -->
+<!--- if you have no ide what to do, start here: http://wiki.ros.org/roslaunch/XML -->
+<!--- also check point 2 here: http://wiki.ros.org/rosparam -->
+
+<launch>
+  <node name="controller_node" pkg="controller_pkg" type="controller_node" clear_params="true" output = "screen"/>
+    <!-- <rosparam command="load" file="$(find controller_pkg)/config/controller_params.yaml" />
+  </node> -->
+  <!-- todo: load rosparam from file here -->
+</launch>
+

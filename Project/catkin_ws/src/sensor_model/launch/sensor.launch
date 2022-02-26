@@ -1,0 +1,8 @@
+
+<launch>
+  <node name="sensor_node" pkg="sensor_model" type="sensor_node" clear_params="true" output="screen">
+    <rosparam command="load" file="$(find sensor_model)/config/victims_location.yaml" />
+  </node>
+  <!-- todo: load rosparam from file here -->
+</launch>
+

@@ -1,0 +1,6 @@
+
+<launch>
+  <node name="vnav_sim" pkg="unity_bridge" type="VNAV.x86_64"/>
+  <node name="w_to_unity" pkg="unity_bridge" type="w_to_unity"/>
+  <node name="unity_state" pkg="unity_bridge" type="unity_state"/>
+</launch>

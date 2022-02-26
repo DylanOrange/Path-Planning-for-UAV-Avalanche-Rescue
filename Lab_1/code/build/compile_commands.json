@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/home/dylan/autonomous-systems-2021-group/Lab_1/code/build",
+  "command": "/usr/bin/x86_64-linux-gnu-g++-7   -I/home/dylan/autonomous-systems-2021-group/Lab_1/code/include  -g   -o CMakeFiles/random_vector.dir/src/main.cpp.o -c /home/dylan/autonomous-systems-2021-group/Lab_1/code/src/main.cpp",
+  "file": "/home/dylan/autonomous-systems-2021-group/Lab_1/code/src/main.cpp"
+},
+{
+  "directory": "/home/dylan/autonomous-systems-2021-group/Lab_1/code/build",
+  "command": "/usr/bin/x86_64-linux-gnu-g++-7   -I/home/dylan/autonomous-systems-2021-group/Lab_1/code/include  -g   -o CMakeFiles/random_vector.dir/src/random_vector.cpp.o -c /home/dylan/autonomous-systems-2021-group/Lab_1/code/src/random_vector.cpp",
+  "file": "/home/dylan/autonomous-systems-2021-group/Lab_1/code/src/random_vector.cpp"
+}
+]

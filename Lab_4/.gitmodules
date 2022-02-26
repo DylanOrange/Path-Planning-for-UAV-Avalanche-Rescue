@@ -1,0 +1,3 @@
+[submodule "aas_ws/src/mav_comm"]
+	path = aas_ws/src/mav_comm
+	url = https://github.com/ethz-asl/mav_comm.git

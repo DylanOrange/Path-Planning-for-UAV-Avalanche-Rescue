@@ -1,0 +1,11 @@
+# todo: add controller parameters here
+
+params: {
+    kx : 7.0,
+    kv : 7.0,
+    kr : 7.0,
+    komega : 1.5             
+}
+
+
+
