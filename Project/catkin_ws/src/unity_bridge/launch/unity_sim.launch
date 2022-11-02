@@ -1,7 +1,7 @@
 
 <launch>
   <node name="unity_sim" pkg="unity_bridge" type="AVALANCHE.x86_64"/>
-  <node name="w_to_unity" pkg="unity_bridge" type="w_to_unity" output="screen"/>
-  <node name="unity_state" pkg="unity_bridge" type="unity_state" output="screen"/>
-  <node name="traj_publisher" pkg="unity_bridge" type="traj_publisher"/>
+  <node name="w_to_unity" pkg="unity_bridge" type="w_to_unity" />
+  <node name="unity_state" pkg="unity_bridge" type="unity_state" />
+  <node name="traj_publisher" pkg="unity_bridge" type="traj_publisher" output="screen"/>
 </launch>

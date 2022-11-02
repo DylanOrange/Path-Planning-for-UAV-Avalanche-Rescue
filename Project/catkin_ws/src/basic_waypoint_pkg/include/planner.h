@@ -6,15 +6,10 @@
 #include <Eigen/Dense>
 #include <nav_msgs/Odometry.h>
 #include <eigen_conversions/eigen_msg.h>
-#include <mav_trajectory_generation/polynomial_optimization_nonlinear.h>
-#include <mav_trajectory_generation_ros/ros_visualization.h>
-#include <mav_trajectory_generation_ros/ros_conversions.h>
 
 class BasicPlanner {
 public:
     BasicPlanner(ros::NodeHandle& nh);
-
-    void uavOdomCallback(const nav_msgs::Odometry::ConstPtr& pose);
 
     void onCurrentState(const nav_msgs::Odometry& cur_state);
 
@@ -26,7 +21,7 @@ public:
 
     void globalsearch();
 
-    double mean_signal(const std::vector<double> signal_cache);
+    double mean_signal(const std::vector<double> &signal_cache);
 
     void interpolate(const Eigen::Vector3d& beginpoint, const Eigen::Vector3d& endpoint,Eigen::MatrixXd *middlepoint, const int& num);
 
@@ -34,52 +29,53 @@ public:
 
     void display_victims();
 
+    void remove_failures();
+
+    double mean_signal_wo_failures(const std::vector<double> &signal_cache,  const std::vector<int> &failure_index);
+
     bool reachgoal(const Eigen::VectorXd& goal_pos);
 
-    bool planTrajectory(const Eigen::VectorXd& goal_pos,
-                        const Eigen::VectorXd& goal_vel,
-                        mav_trajectory_generation::Trajectory* trajectory,
-                        const Eigen::MatrixXd *way_points);
+    double distance2goal(const Eigen::VectorXd& goal_pos);
 
-    bool planTrajectory(const Eigen::VectorXd& goal_pos,
-                        const Eigen::VectorXd& goal_vel,
-                        const Eigen::VectorXd& start_pos,
-                        const Eigen::VectorXd& start_vel,
-                        double v_max, double a_max,
-                        mav_trajectory_generation::Trajectory* trajectory);
+    bool publishState(const double &still , const double &velocity, const Eigen::Vector3d &startpoint, const Eigen::Vector3d &endpoint);
 
-    bool publishTrajectory(const mav_trajectory_generation::Trajectory& trajectory);
+    Eigen::Vector3d potentialField(const double &alpha, const Eigen::Vector3d &x, const Eigen::Vector3d &endpoint);
 
 private:
-    ros::Publisher pub_markers_;
-    ros::Publisher pub_trajectory_;
-    ros::Subscriber sub_odom_;
+
+    ros::Publisher pub_state;
     ros::Subscriber current_state;
     ros::Subscriber signal_intensity;
 
     ros::NodeHandle& nh_;
     Eigen::Vector3d x;
     Eigen::Vector3d v; 
-    Eigen::Affine3d current_pose_;
-    Eigen::Vector3d current_velocity_;
-    Eigen::Vector3d current_angular_velocity_;
-    Eigen::Vector3d goal_velocity;
     Eigen::MatrixXd global_path;
     Eigen::Vector3d goal_position;
-    Eigen::MatrixXd found_victims;
     Eigen::VectorXd signal;
-    mav_trajectory_generation::Trajectory trajectory;
-    std::vector<std::vector<double>> pred_victims;
-    // std::vector<double> signal;
-    std::vector<int> pred_victims_index;
-    double max_v_; // m/s
-    double max_a_; // m/s^2
-    double max_ang_v_;
-    double max_ang_a_;
-    double grid_width;
-    double sensor_range;
+    Eigen::Vector4d grid;
+    Eigen::MatrixXd positions_of_victims;
+
     int num_victims;
+    int angle;
+
+    double depth;
+    double error_rate;
+    double distance_error;
+    double sensor_range;
+    double global_velocity;
+    double local_velocity;
+    double height;
+
     XmlRpc::XmlRpcValue position;
+    XmlRpc::XmlRpcValue position_victims;
+
+    std::vector<int> pred_victims_index;
+    std::vector<double> pred_victims_error; 
+    std::vector<double> pred_victims_error_distance; 
+    std::vector<std::vector<double>> pred_victims;
+    
+    ros::Time start;
 
 };
 

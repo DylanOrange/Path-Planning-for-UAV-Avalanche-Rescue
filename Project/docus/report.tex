@@ -1,0 +1,393 @@
+
+
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage[title]{appendix}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithm}
+% \usepackage{algpseudocode}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{pgfplots}
+\usepackage{array}
+\usetikzlibrary{calc}
+\usepackage{amsmath}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\makeatletter
+\newcommand{\linebreakand}{%
+  \end{@IEEEauthorhalign}
+  \hfill\mbox{}\par
+  \mbox{}\hfill\begin{@IEEEauthorhalign}
+}
+\makeatother
+    
+\begin{document}
+
+\title{Search and Rescue of Avalanche Victims\\}
+
+\author{\IEEEauthorblockN{1\textsuperscript{st} Dongyue Lu}
+\IEEEauthorblockA{\textit{Department of Informatics} \\
+\textit{Technical University of Munich}\\
+Munich, Germany \\
+dongyue.lu@tum.de}
+\and
+\IEEEauthorblockN{2\textsuperscript{nd} Yamo Akrami}
+\IEEEauthorblockA{\textit{Department of Informatics} \\
+\textit{Technical University of Munich}\\
+Munich, Germany \\
+ga63hen@mytum.de}
+\and
+\IEEEauthorblockN{3\textsuperscript{rd} Xuhui Zhang}
+\IEEEauthorblockA{\textit{Department of Mechanical Engineering} \\
+\textit{Technical University of Munich}\\
+Munich, Germany \\
+xuhui.zhang@mytum.de}
+\linebreakand
+\IEEEauthorblockN{4\textsuperscript{th} Yunfeng Kang}
+\IEEEauthorblockA{\textit{Department of Informatics} \\
+\textit{Technical University of Munich}\\
+Munich, Germany \\
+yunfeng.kang@tum.de}
+\and
+\IEEEauthorblockN{5\textsuperscript{th} Yuhang Cai}
+\IEEEauthorblockA{\textit{Department of Informatics} \\
+\textit{Technical University of Munich}\\
+Munich, Germany \\
+yuhang.cai@tum.de}
+}
+
+\maketitle
+
+\begin{abstract}
+This work explores the possibility of using UAVs in avalanche rescue. We deploy a UAV equipped with an avalanche beacon in a simulation environment. Four different algorithms are proposed for the search of victims in avalanche scenario, and methods' performances are compared through a series of experiments. The conclusion demonstrates the high efficiency, high accuracy and high robustness of victim rescue using drones, which has important implications for the practical application of UAVs.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Avalanche Rescue, Triangulation, Iterative local search, Drone path planning
+\end{IEEEkeywords}
+
+\section{Introduction}
+Sport activities such as skiing, snowboarding or hiking in winter are very popular \cite{winter-pop1}\cite{winter-pop2}. A potential danger that winter sportsmen are confronted with is avalanches, and they pose a great threat since they happen most of the time in unguarded, unwatched and less accessible areas and the process of locating avalanche victims takes a long time. Moreover, the victim survivability drops below 80\% after only 10 min of being buried according to an avalanche survivability survey\cite{article}. Hence, it is very important to locate avalanche victims fast and accurately. 
+
+% \begin{figure}[h!]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{project/images/survey.png}
+%     \caption{Survival curve for people buried in avalanche}
+%     \label{fig:survey}
+% \end{figure}
+
+An area hit by an avalanche is difficult to access and poses sometimes additional danger to the rescue team. But drones integrated with automatic devices are fast and agile which makes them a perfect rescue agent in avalanche scenarios. They are often used to locate the victim stuck in the avalanche autonomously and quickly. Many previous literature and projects \cite{doi:10.1080/19475705.2016.1238852}\cite{avalanche-rescue-drone1}\cite{avalanche-rescue-drone2} have demonstrated the feasibility of using drones in rescues.
+
+In this work we address the rescue problem of victims in an avalanche scenario. We mainly focus on how to locate victims quickly and accurately. Further, we conduct our work in a simulation environment and deploy a drone with a sensor to locate avalanche victims. In Section \ref{section:Problem Description}, we describe our simulated avalanche scenario and the problem addressed in this work. Following, in Section \ref{section:Sensor Model} we discuss the specification of the sensor model which receives the emitted signals by avalanche victims. Search methods to cover the avalanche area and locate the victims are addressed in Section \ref{section:Search Methods}. In section \ref{section:path planner} we introduce our trajectory generation method and controller. The experiments and results are presented in \ref{section:Experiments and Results}. Finally, in Section \ref{setion:Conclusion} we will summarize the work and give an outlook for perspective research.  
+
+\section{Problem Description}\label{section:Problem Description}
+The avalanche scene is simplified to a slope with length and width of several hundred meters with an angle $ \theta = 7^{\circ}$. Victims are distributed on the slope and the drone flies at a fixed height $h=5$m over the slope.
+The drone is a quadrotor unmanned aerial vehicle (UAV) and its dynamics are similar to that formulated by Taeyoung Lee et al. in \cite{5717652}. It carries a simulated avalanche beacon sensor to receive the victim's signal. It should cover the entire avalanche area with least time, accurately locate the victim, and fly to the victim afterwards to show that the localization is successful. We stipulate that the rescue must be within 15 minutes to improve the survival probability of the victim. For simplicity, we do not consider external environmental factors such as temperature, altitude, and wind, nor do we consider factors such as drone battery capacity and weight.
+
+
+\section{Sensor Model}\label{section:Sensor Model}
+Avalanche transceivers are common devices employed in mountain activities. In transmission mode, they emit a low pulsed radio signal at frequency $f = 457 Hz$. Once commutated into the receiving mode, they work as radio direction finding equipments reconstructing the direction and the distance of the source transceiver, to search signals coming from other transceivers.
+
+In this work, we assume that the sensor can only give the signal's intensity which is inversely proportional to the distance. Except the method of \ref{subsubsection:Iterative Local Search (ILS)}, we assume that the sensor can only receive the intensity signal. For \ref{subsubsection:Iterative Local Search (ILS)}, the sensor can also receive the direction signal. The transmission range of different transceivers varies from $20m$ to $70m$. and in this work, we set the working range $r = 20m$, so the observed intensity of the signal emitted by a victim is computed by 
+
+\begin{equation}
+    \bar{i}_{t} = \frac{r}{dist_{v}}
+\end{equation}
+
+where $dist_{v}$ is the ground truth distance to a victim.
+
+\subsection{Noise}
+
+We assume that the intensity at timestamp $t$ is noisy and defined as follows
+
+\begin{equation}
+i_{t} = \bar{i}_{t} + \epsilon_{t}
+\end{equation}
+
+where $\epsilon_{t}$ is the noise term that follows an exponential distribution scaled by uniform distribution
+
+\begin{equation}
+\epsilon_{t} \sim U([0, 1]) \cdot \lambda e^{- \lambda \bar{i}_{t}}\label{eq:noise}
+\end{equation}
+
+ Exponential distribution of the noise comes from the behaviour of sensors in the real world. If the drone flies away from a victim, the intensity decreases and the noise increases. In contrast, approaching a victim makes the intensity increase and the noise decrease. Moreover, the multiplication with an uniform distribution $U([0, 1])$ in Equation \eqref{eq:noise} introduces a randomness in the noise. Furthermore, we set $\lambda = 1$.  
+
+
+\subsection{Direction Finding}\label{subsection:Direction Finding}
+
+In \ref{subsubsection:Iterative Local Search (ILS)} we introduce an approach that relies on the magnitude of the intensity in each direction. Such a sensor model can be interpreted as an antenna that points in positive and negative x, y and z direction (see Figure \ref{fig:direction-sensor} in Appendix \ref{section:Figures}). In each direction the sensor measures a intensity between $[-1, 1]$.
+
+We reach this by computing
+
+\begin{equation}
+\hat{d}_{t} = \frac{\Vec{d}_{t}}{\lVert \Vec{d}_{t}\rVert + c}\label{eq:direction-sensor}
+\end{equation}
+
+with $c$ as a constant and $\Vec{d}_{t} = \Vec{v}_{t} - \Vec{x}_{t}$. Here, $x_{t}$ is the current position of the drone and $v_{t}$ is the victim position.
+
+% \begin{figure}[h!]
+%     \centering
+%     \includegraphics[width=0.15\textwidth]{project/images/direction-sensor.png}
+%     \caption{An antenna with 6 end points directed in positive x, y, z and negative x, y and z.}
+%     \label{fig:direction-sensor}
+% \end{figure}
+
+\section{Search Methods}\label{section:Search Methods}
+Due to the limited working range of the transceiver, we have to get close enough to the victim for precise positioning. So our search is divided into global search and local search.
+
+\subsection{Global Search}
+For global search, to cover the search area as quickly as possible, we use the most common method used by rescue teams: in a simplified scenario as Figure \ref{fig:global}, the drone flies in the normal direction of the avalanche, and after reaching the end point, the drone turns $90^{\circ}$, after flying a distance of grid length $w_{g}$ in the parallel direction of the avalanche, turns $90^{\circ}$ again and flies in the normal direction of the avalanche. The grid length $w_{g}$ depends on specific local search method. The drone should repeat this procedure to cover the entire avalanche area.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.45\textwidth]{project/images/globalsearch.png}
+    \caption{Global Search}
+    \label{fig:global}
+\end{figure}
+
+\subsection{Local Search}
+We try four different local search methods separately.
+\subsubsection{Cross Flight}
+The basic idea of Cross Flight method comes from \cite{doi:10.1080/19475705.2016.1238852}, we expand this method to multiple victims and 3D scenario. The whole process is shown in Figure \ref{fig:cross}, Once the victim signal is received, the drone enters the Cross Flight local search, records the position $h1$ at this time, and flies forward until the victim signal is lost, and the disappearance position is recorded as $h2$. Then the drone flies backwards to the midpoint between $h1$ and $h2$, turns $90^{\circ}$, repeats the above process, records the disappearance positions of the two victim signals in the vertical direction as $v1$ and $v2$, and records the midpoint of $v1$ and $v2$ as $p_{c}$. $p_{c}$ must be the projected point of victim $p_{v}$ on the drone plane. $h1$, $h2$, $v1$, $v2$ must be on the sphere with the victim position $p_{v}$ as the center, and these four points are on the circle with $p_{c}$ as the center of the circle and $\Vec{\mathbf{n}}_{\mathbf{c}}$ as the normal vector. Since the victim plane is known, based on a certain point $p_{p}$ on the plane and its normal vector $\Vec{\mathbf{n}}_{\mathbf{p}}$, the intersection of the line $\Vec{\mathbf{n}}_{\mathbf{c}}$ and the victim plane can be calculated as the victim's position.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.35\textwidth]{project/images/cross.png}
+    \caption{Cross Flight}
+    \label{fig:cross}
+\end{figure}
+
+\begin{equation}
+t = \frac{\Vec{\mathbf{n}}_{\mathbf{p}}(p_{p} - p_{c})}{\Vec{\mathbf{n}}_{\mathbf{p}}\cdot \Vec{\mathbf{n}}_{\mathbf{c}}} \label{eq:pf}
+\end{equation}
+
+\begin{equation}
+p_{v} = p_{c} + \Vec{\mathbf{n}}_{\mathbf{c}}t \label{eq:pf}
+\end{equation}
+
+It can also be seen from the Figure \ref{fig:cross} that for the Cross Flight method, in the extreme case, $w_{g} = 2r=40m$, in practice, we choose $w_{g} = 35m$ to cover a larger search area as much as possible, and reduce the possibility of missing victim signal.
+
+\subsubsection{Iterative Cross Flight (ICF)}
+
+After the local search, the distance error could be not low enough due to the heavy noise. Therefore, it is necessary to further take a step to gradually reduce the error to a certain level through an iterative method. Here we use the intensity received at the victim position as the criterion to decide whether to let the drone enter Iterative Cross Flight. 
+
+As shown in the Figure \ref{fig:cross_section_mountain}, there are two unit vectors $\overrightarrow{e1}$ and $\overrightarrow{e2}$ on the drone plane, which are the movement directions of the drone during Cross Flight and Iterative Cross Flight. After the Cross Flight, if the intensity received at the victim location is not higher than the threshold, the drone will fly from the victim position to the midpoint $p_{c}$ in the drone flight plane. Next, instead of continuing the global search, it will repeat the Cross Flight in this plane. In the Figure \ref{fig:cross_section_mountain}, $v1$ and $v2$ are the boundary points in Cross Flight and $v3$ and $v4$ are the boundary points in the first iterative search. Unlike the normal Cross Flight, the criterion for judging whether the drone should stop is no longer an intensity of zero, but an appropriate threshold. This threshold increases with the number of iterations. This allows the drone to perform local search in a smaller area, thereby improving the accuracy of the results. 
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.35\textwidth]{project/images/prototype.png}
+    \caption{Iterative Cross Flight}
+    \label{fig:cross_section_mountain}
+\end{figure}
+
+\subsubsection{Iterative Local Search (ILS)}\label{subsubsection:Iterative Local Search (ILS)}
+
+The idea of the Iterative Local Search algorithm is to navigate the drone gradually to the victim. Preferably, the drone should take large steps towards a victim when far away and small steps, otherwise. Hence, we exploit the intensity of the sensor model described in \ref{section:Sensor Model} to influence the step size in each iteration.
+
+One solution is to exploit the direction and the magnitude of the intensity observed by the sensor model. In \eqref{eq:ils-adpt-stepsize} we see an iterative local search method with an adaptive step size assuming a sensor model discussed in \ref{subsection:Direction Finding}.
+
+\begin{equation}
+\Vec{x}_{t+1} = \Vec{x}_{t} + \alpha*\frac{r_{t}}{i_{t}}*\hat{d}_{t}\label{eq:ils-adpt-stepsize}
+\end{equation}
+
+Here, $\Vec{x}_{t+1}$ is the next state at timestamp $t+1$ and $\Vec{x}_{t}$ is the current state at timestamp $t$ and $\hat{d}_{t}$ is computed using Equation \eqref{eq:direction-sensor}, $\frac{r_{t}}{i_{t}}$ is the adaptive step size, and $\alpha$ is a scaling factor. We found out that $\alpha = 0.5$ prevents the drone from overshooting or oscillating. The step size depends on the range $r_{t}$ and the intensity $i_{t}$. It decreases if the drone approaches a victim because the intensity increases. It also prevents the drone to take big steps as this could lead to overshooting or oscillating behaviour. On the other hand, if the drone is far away from a victim the step size is large because the intensity is low. Hence, the drone is taking big steps towards a victim and preventing a slow convergence. The algorithm terminates when $\left\|\Vec{x}_{t+1} - \Vec{x}_{t}\right\|_2 \leq 0.1$. 
+
+For an attempt to devise an approach without taking advantage of the direction see in Appendix \ref{section:Undirected ILS}.. 
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.35\textwidth]{project/images/Triangulation.png}
+    \caption{Triangulation}
+    \label{fig:Triangulation}
+\end{figure}
+
+\subsubsection{Triangulation}
+Different from the above three methods, triangulation only records the position where the drone receive or lose the victim's signal during the global search process, which are denoted as marginal points $m_i$. After covering all area, the drone calculates the position of all victims and returns to rescue. Since the marginal points of all victims are mixed together, we need to find out the correspondence between each victim and its marginal points.
+We perform two screenings, as shown in Figure \ref{fig:Triangulation}. First, the midpoint of a victim's marginal points in the x-coordinate must be the same as the victim's x-coordinate
+
+\begin{equation}
+v_x = \frac{1}{2}(m_{1x} +m_{2x}) = \frac{1}{2}(m_{3x} +m_{4x})\label{eq:yd}
+\end{equation}
+
+After screening candidates, given the grid width $w_g$, we conduct a second screening: The candidates must be on the victim-centred circle:
+\begin{equation}
+(v_x - m_{1x})^2 + {w_1}^2 = (v_x - m_{3x})^2 + {w_2}^2\label{eq:yd}
+\end{equation}
+\begin{equation}
+w_1 + w_2 = w_g\label{eq:yd}
+\end{equation}
+Through the above two screenings, we can determine all pairs of marginal points belonging to the same victim and calculate the victim's position, but it should be noted that this point is actually the projection point of the victim's position on the drone plane. In the same way as in the previous methods, given drone plane and victim plane, we can calculate the real victim position from this projection point.
+
+After locating the victims, the drone visits corresponding points and records the signal intensity at each point. This step works as verification and rescuing. If it is larger than a given threshold, we assume the victim is actually located here and is rescued. To reduce the influence of the signal's noise, we can set the grid width $w_g$ as smaller values, which leads to more measurements for each victim and more accurate results.
+
+
+\section{Path Planner and Controller}\label{section:path planner}
+
+\subsection{Potential Field}
+
+In this work, we try to use potential field to navigate the drone to the victim after locating the victim. Regardless of obstacles, we only need to build an attraction field centered on the target location
+\begin{equation}
+U_{t} = \frac{1}{2}\zeta(\Vec{x}_{goal} - \Vec{x}_{t})^2 \label{eq:pf}
+\end{equation}
+
+The position update depends on the attractive force, which is the derivative of the potential energy field.
+\begin{equation}
+\Vec{x}_{t+1} = \Vec{x}_{t} + \nabla U_{t} \label{eq:pf}
+\end{equation}
+\begin{equation}
+\nabla U_{t} = \zeta(\Vec{x}_{goal} - \Vec{x}_{t}) \label{eq:pf}
+\end{equation}
+
+The planner terminates when $\left\|\Vec{x}_{t+1} - \Vec{x}_{t}\right\|_2 \leq 0.5$.
+
+\subsection{Trajectory Generation}
+Since we don't need to consider obstacles, all trajectories can run in a straight line, so we use a simple trajectory planner to fly to the target point in a straight line at a given speed. Based on the velocity and kinematic equations, we can calculate the desired state of the drone for each step and pass it to the controller. When approaching the target, we use recursive judgment of the distance, and when the distance from the target point increases, we replan the trajectory to prevent overshoot.
+
+\subsection{Geometric Tracking Controller}
+We use a geometric tracking controller \cite{5717652} that is designed so that the position tracking error converges to zero when there is no attitude tracking error, and it is properly adjusted for non-zero attitude tracking errors to achieve asymptotic stability of the complete dynamics. This controller can achieve almost-global convergence for the drone.
+
+
+\begin{table}[htbp!]
+\centering
+\caption{Comparsion between different local search methods}
+\begin{tabular}{c|ccc|c}
+\hline
+\multirow{method}                   & \multicolumn{3}{c|}{without direction}    & with direction \\ \cline{2-5} 
+                                    & \multicolumn{1}{c|}{Cross Flight}         & \multicolumn{1}{c|}{ICF}              & Triangulation & Dir. ILS      \\ \hline
+Error ($m$)                & \multicolumn{1}{c|}{0.33}                 & \multicolumn{1}{c|}{\textbf{0.22}}    & 0.47          & 0.36          \\
+Area ($m^2$)                & \multicolumn{1}{c|}{415*300}              & \multicolumn{1}{c|}{415*300}          & 415*300       & 415*300       \\
+Time ($s$)                          & \multicolumn{1}{c|}{\textbf{733}}         & \multicolumn{1}{c|}{796}              & 864           & \textbf{702}  \\
+Effi. ($m^2/s$)    & \multicolumn{1}{c|}{\textbf{186}}         & \multicolumn{1}{c|}{172}              & 158.5         & \textbf{195}  \\
+HA              & \multicolumn{1}{c|}{94}                   & \multicolumn{1}{c|}{\textbf{99}}      & 92            & \textbf{100}  \\
+LA               & \multicolumn{1}{c|}{5}                    & \multicolumn{1}{c|}{\textbf{0}}       & 8             & \textbf{0}    \\
+Failure               & \multicolumn{1}{c|}{1}                    & \multicolumn{1}{c|}{1}                & \textbf{0}    & \textbf{0}    \\  \hline
+\end{tabular}
+\label{table:Comparsion}
+\end{table}
+
+% \begin{table*}[htbp!]
+% \centering
+% \caption{Comparsion between different local search methods}
+% \begin{tabular}{c|ccc|c}
+% \hline
+% \multirow{method}                   & \multicolumn{3}{c|}{without direction}    & with direction \\ \cline{2-5} 
+%                                     & \multicolumn{1}{c|}{Cross Flight}         & \multicolumn{1}{c|}{Iterative Cross Flight}              & Triangulation & Directed Iterative Local Search      \\ \hline
+% Error ($m$)                & \multicolumn{1}{c|}{0.33}                 & \multicolumn{1}{c|}{\textbf{0.22}}    & 0.47          & 0.36          \\
+% Covered Area ($m^2$)                & \multicolumn{1}{c|}{415*300}              & \multicolumn{1}{c|}{415*300}          & 415*300       & 415*300       \\
+% Time ($s$)                          & \multicolumn{1}{c|}{\textbf{733}}         & \multicolumn{1}{c|}{796}              & 864           & \textbf{702}  \\
+% Covered area per second ($m^2/s$)    & \multicolumn{1}{c|}{\textbf{186}}         & \multicolumn{1}{c|}{172}              & 158.5         & \textbf{195}  \\
+% Number of high accuracy              & \multicolumn{1}{c|}{94}                   & \multicolumn{1}{c|}{\textbf{99}}      & 92            & \textbf{100}  \\
+% Number of low accuracy               & \multicolumn{1}{c|}{5}                    & \multicolumn{1}{c|}{\textbf{0}}       & 8             & \textbf{0}    \\
+% Number of Failure               & \multicolumn{1}{c|}{1}                    & \multicolumn{1}{c|}{1}                & \textbf{0}    & \textbf{0}    \\  \hline
+% \end{tabular}
+% \label{table:Comparsion}
+% \end{table*}
+
+\section{Experiments and Results}\label{section:Experiments and Results}
+We compare the efficiency, accuracy and robustness of the different search methods described above. In order to ensure the fastest rescue speed, we stipulate that the speed of global search $v_{g}$ is $8m/s$. After locating the victim, the speed of flying to the victim $v_{l}$ is $5m/s$. We do not hover near the victim to reduce time waste. We use the victim coverage area divided by the rescue time to represent the efficiency metrics of rescue (denoted as Effi. in the table). For accuracy and robustness, we define that there are ten victims in each rescue, and classify the rescue performance with different errors: the distance error less than $1m$ is highly accurate, the distance error between $1-5m$ is low accurate (denoted as HA and LA in the table), and higher than $5m$ means the search fails. We perform ten rescues per method using randomly generated victim locations, i.e. a total of 100 victims, and record the average distance error, total rescue time, covered area, and the number of different cases. The experiment results are shown in Table \ref{table:Comparsion}.
+
+From the comparison we can see that between methods without direction, ICF further iterates on the already high accuracy of Cross Flight and thus achieves the highest accuracy. However, these two methods are less robust, which is related to the fact that these two methods need to fly repeatedly to accept the victim's noisy signal. Especially when the victim is at the edge of the transceiver's working range, weak signal and repeated flight are likely to cause the method to fail. Triangulation consumes the most time due to the need for shorter grid width and increased flight distance. Further comparison between Cross Flight and triangulation can be seen in Appendix \ref{section:Crossandtri}.
+
+We list the directed ILS separately, because it has direction as more conditions. We can see that with direction, after receiving the signal, this method can fly directly to the victim, saving time and reducing the possibility of interference by noise. The design of adaptive size also reduces the occurrence of overshoot and oscillation, and has strong robustness.
+
+Compared with human, the flight speed of a drone at 8m/s is about 4 times that of the human walking speed, and the search for an area of about 120,000 square meters can be completed in about 12 minutes, especially after having the direction information, the drone can directly fly to the victim, which greatly saves time and effectively increases the victim's chance of survival. 
+
+\section{Conclusions}\label{setion:Conclusion}
+UAV has great application potential in avalanche rescue. In this project, we use different methods to achieve accurate and rapid positioning and rescue of victims in avalanche scenes. We compare the efficiency, accuracy and robustness of different methods. The results show that iterative methods with more sensor information have higher efficiency and robustness. Under the condition of less sensor information, the traditional geometric method has higher accuracy. The search method can further improved by exploring field-based direct search methods. At the same time, the coverage efficiency of UAVs has been proved to be much higher than that of humans, which provides a simulation basis for future practical applications.
+
+% \newpage
+{\small
+\bibliographystyle{unsrt}
+\bibliography{egbib}
+}
+
+\newpage
+\begin{appendices}
+
+\section{Undirected ILS}\label{section:Undirected ILS}
+
+In Equation \eqref{eq:unk-ils} we see our first attempt to devise a state update equation. 
+
+\begin{equation}
+\Vec{x}_{t+1} = \Vec{x}_{t} + I*\Delta{\Vec{x}}\label{eq:unk-ils}
+\end{equation}
+
+$I = \tanh(\Delta{i})$ where $\Delta{i} = i_{t} - i_{t-1}$ is the difference of previous and current intensity. This term influence the forward and backward movement. Further, $\Delta{\Vec{x}} = \Vec{x}_{t} - \Vec{x}_{t-1}$ is the difference of the previous and current state of the drone and acts as an step size.
+
+The idea behind this update rule is that the drone will keep flying in the direction when the argument of the tangens hyperbolicus is greater than zero. This happens when the difference of the intensity $\Delta{i}$ is greater than zero. If the difference of the intensity $\Delta{i}$ is smaller than zero, the drone will fly in the opposite direction (see Figure \ref{fig:tanh}). Lastly, we multiply the difference of the state of the drone $\Delta{\Vec{x}}$ in order to prevent large steps which leads to overshooting or oscillating. As in \ref{subsubsection:Iterative Local Search (ILS)} the algorithm terminates when $\lVert\Vec{x}_{t+1} - \Vec{x}_{t}\rVert \leq 0.1$. 
+
+However this approach has a downside. Imagine the drone is flying along the x-axis so that there is no change in y-direction of the state. This leads to $\Delta{y} = 0$ and $y_{t}$ will stay the same for every iteration in the update rule \eqref{eq:unk-ils}.
+\\~\\
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.6]
+\begin{axis}[
+    xmin=-2.5, xmax=2.5,
+    ymin=-1.5, ymax=1.5,
+    axis lines=center,
+    axis on top=true,
+    domain=-2.5:2.5,
+    ylabel=$I$,
+    xlabel=$\Delta{i}$,
+    ]
+
+    \addplot [mark=none,draw=grey,ultra thick] {tanh(\x)};
+    \node [right, grey] at (axis cs: 1,0.7) {$I = \tanh \Delta{i}$};
+    
+    %% Add the asymptotes
+    \draw [black, dotted, thick] (axis cs:-2.5,-1)-- (axis cs:0,-1);
+    \draw [blue, dotted, thick] (axis cs:+2.5,+1)-- (axis cs:0,+1);
+\end{axis}
+\end{tikzpicture}
+\caption{The difference of the current and previous intensity passed to tangens hyperbolicus function.}
+\label{fig:tanh}
+\end{figure}
+
+\section{Figures}\label{section:Figures}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.15\textwidth]{project/images/direction-sensor.png}
+    \caption{An antenna with 6 end points directed in positive x, y, z and negative x, y and z.}
+    \label{fig:direction-sensor}
+\end{figure}
+
+\section{Cross Flight and Triangulation} \label{section:Crossandtri}
+Cross Flight, ICF and Dir. ILS interrupt global search and enter local search when receiving victim signal. However, in triangulation victims are localized after the drone cover the whole area. Results of Cross Flight and triangulation tell advantages of each method. For large area with few victims, Cross Flight achieves less time. This comes from larger grid width.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.0\linewidth]{project/images/cfvstri.png}
+    \caption{To receive signal, grid width for Cross Flight should be no larger than the diameter. However, triangulation needs at least 4 marginal points for localization. The maximal grid width is the radius. Cross Flight needs about half fly-overs of triangulation.}
+    \label{fig:my_label}
+\end{figure}
+
+Whereas, triangulation is more competitive as victims increase in the same area due to a different rescuing strategy. Local search time increases obviously for Cross Flight, while total time of triangulation only increases slightly. This comes from more calculation time and more victims to finally go through.
+
+\begin{table}[htbp!]
+\caption{Comparison between Cross Flight and triangulation}
+    \centering
+    \resizebox{9.1cm}{!}
+    {
+    \begin{tabular}{ |l|c|c|c|c| }
+    \hline
+     & 10 victims & 15 victims & 20 victims & 25 victims \\ \hline
+     Time of Cross Flight [s] & 194 & 307 & 409 & 521 \\ \hline
+     Time of triangulation [s] & 277 & 326 & 380 & 445 \\ \hline
+    \end{tabular}
+    }
+    \label{tab:comparison cross tri}
+\end{table}
+
+The test area is 144*300 $m^2$. From 20 victims triangulation overtakes Cross Flight with less time.
+
+% \section{Algorithms}\label{section:Algorithms}
+
+\end{appendices}
+
+\end{document}
